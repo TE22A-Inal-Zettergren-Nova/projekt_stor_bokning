@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class App {
     static void bokningssystem() {
         int antalLedigaPlatser = 20;
-        char[][] platser = new char[5][4]; //array
+        char[][] platser = new char[5][4]; // Array med 5 rader och 4 kolumner
 
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
@@ -25,9 +25,9 @@ public class App {
             System.out.println("Ange ditt personnummer:");
             String personnummer = tb.nextLine();
 
-            System.out.println("Vill du boka en fönsterplats, gångplats eller avsluta? (1: fönster/2: gång/3: avsluta)");
+            System.out.println("Vill du boka en fönsterplats, gångplats eller avsluta? (1: fönster 2: gång 3: avsluta)");
             int val = tb.nextInt();
-            tb.nextLine(); // För att konsumera ny rad
+            tb.nextLine(); // För att konsumera ny rad, undiva skippad inmatning från användaren
 
             switch (val) {
                 case 1: // Fönsterplats
@@ -40,6 +40,7 @@ public class App {
                             antalLedigaPlatser--;
                             System.out.println("Din bokning lyckades för (" + personnummer + ", " + namn + ")");
                             System.out.println("Din platsnummer är: " + (plats[0] * platser[0].length + plats[1] + 1));
+                            skrivUtPlatser(platser);
                         } else {
                             System.out.println("Tyvärr, inga tillgängliga fönsterplatser finns");
                         }
@@ -56,6 +57,7 @@ public class App {
                             antalLedigaPlatser--;
                             System.out.println("Din bokning lyckades för (" + personnummer + ", " + namn + ")");
                             System.out.println("Ditt platsnummer är: " + (plats[0] * platser[0].length + plats[1] + 1));
+                            skrivUtPlatser(platser);
                         } else {
                             System.out.println("Tyvärr, inga tillgängliga gångplatser finns");
                         }
@@ -64,6 +66,7 @@ public class App {
 
                 case 3: // Avsluta
                     System.out.println("Hejdå…");
+                    skrivUtPlatser(platser);
                     return;
 
                 default:
@@ -75,11 +78,12 @@ public class App {
             String svar = tb.nextLine();
             if (svar.equals("avsluta")) {
                 System.out.println("Tack för du bokade hos oss!");
+                skrivUtPlatser(platser);
                 return;
             }
         }
     }
-
+    // Metod som hittar lediga platser
     public static int[] hittaLedigPlats(char[][] platser, char typ) {
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
@@ -89,6 +93,16 @@ public class App {
             }
         }
         return null;
+    }
+    // Skriver ut en bild på arrayen med antalet platser
+    public static void skrivUtPlatser(char[][] platser) {
+        System.out.println("Platser:");
+        for (int i = 0; i < platser.length; i++) {
+            for (int j = 0; j < platser[i].length; j++) {
+                System.out.print("[" + platser[i][j] + "] ");
+            }
+            System.out.println();
+        }
     }
 
    
