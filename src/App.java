@@ -5,10 +5,22 @@ public class App {
     static char[][] platser;
     static String[] bokadeNamn;
     static String[] personnummer;
+    static Scanner tb = new Scanner(System.in);
+
+
+    // För att hittaplats
+    static int hittaBokadPlats(String info) {
+        for (int i = 0; i < bokadeNamn.length; i++) {
+            if (info.equals(bokadeNamn[i]) || info.equals(personnummer[i])) {
+                return i + 1; // Platsnumret är index + 1
+            }
+        }
+        return -1; // Returnera -1 om ingen bokad plats hittas
+    }
+    
 
     // För att avboka
     static void avbokning() {
-        Scanner tb = new Scanner(System.in);
         System.out.println("Ange ditt namn eller personnummer för avbokning:");
         String avbokningsinfo = tb.nextLine();
 
@@ -19,12 +31,13 @@ public class App {
                 platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig
                 bokadeNamn[i] = null; // Ta bort namnet från listan över bokade
                 personnummer[i] = null; // Ta bort personnumret från listan över bokade
-                System.out.println("Bokningen har avbokats för " + avbokningsinfo);
+                System.out.println("Platsen" + platser[radnummer][kolumnnummer] + "har avbokats för " + avbokningsinfo);
                 meny();
+
+            }else{
+                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");}
             }
         }
-        System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
-    }
 
     // För att boka plats
     static void bokningssystem() {
@@ -43,7 +56,6 @@ public class App {
             }
         }
 
-        Scanner tb = new Scanner(System.in);
 
         while (true) {
             System.out.println("Ange ditt namn:");
@@ -140,11 +152,10 @@ public class App {
     }
 
     static void meny() {
-        Scanner tb = new Scanner(System.in);
         boolean running = true;
 
         while (running) {
-            System.out.println("Meny \n 1. Boka \n 2. Hitta plats \n 3. Avboka \n 4. Beräkna vinst \n 5. Avsluta");
+            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Beräkna vinst \n 5. Avsluta");
             try {
                 int startval = Integer.parseInt(tb.nextLine());
 
@@ -153,10 +164,20 @@ public class App {
                         bokningssystem();
                         running = false;
                         break;
-                    case 2: //hitta plats
-
-                    case 3: //Avboka plats
+                    case 2: //Avboka plats
                         avbokning();
+                        running = false;
+                        break;
+                    case 3: //Hitta plats
+                        System.out.println("Ange ditt namn eller personnummer för att hitta din plats:");
+                        String info = tb.nextLine();
+                        int platsnummer = hittaBokadPlats(info);
+                        if (platsnummer != -1) {
+                            System.out.println("Du har plats: " + platsnummer);} 
+                        else {
+                            System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+                            meny();
+                        }
                         running = false;
                         break;
                     case 4: //Beräkna vinst
