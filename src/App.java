@@ -1,18 +1,38 @@
 import java.util.Scanner;
 
-
 public class App {
-    
+
+    static char[][] platser;
+    static String[] bokadeNamn;
+    static String[] personnummer;
+
     // För att avboka
     static void avbokning() {
+        Scanner tb = new Scanner(System.in);
+        System.out.println("Ange ditt namn eller personnummer för avbokning:");
+        String avbokningsinfo = tb.nextLine();
 
+        for (int i = 0; i < bokadeNamn.length; i++) {
+            if (avbokningsinfo.equals(bokadeNamn[i]) || avbokningsinfo.equals(personnummer[i])) {
+                int radnummer = i / platser[0].length;
+                int kolumnnummer = i % platser[0].length;
+                platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig
+                bokadeNamn[i] = null; // Ta bort namnet från listan över bokade
+                personnummer[i] = null; // Ta bort personnumret från listan över bokade
+                System.out.println("Bokningen har avbokats för " + avbokningsinfo);
+                meny();
+            }
+        }
+        System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
     }
 
     // För att boka plats
     static void bokningssystem() {
         int antalLedigaPlatser = 20;
-        char[][] platser = new char[5][4]; // Array med 5 rader och 4 kolumner
-    
+        platser = new char[5][4]; // Array med 5 rader och 4 kolumner
+        bokadeNamn = new String[platser.length * platser[0].length]; // Array för namn på bokade
+        personnummer = new String[platser.length * platser[0].length]; // Array för personnummer på bokade
+
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
                 if (j == 0 || j == 3) {
@@ -22,20 +42,20 @@ public class App {
                 }
             }
         }
-    
+
         Scanner tb = new Scanner(System.in);
-    
+
         while (true) {
             System.out.println("Ange ditt namn:");
             String namn = tb.nextLine();
-    
+
             System.out.println("Ange ditt personnummer:");
-            String personnummer = tb.nextLine();
-    
-            System.out.println("Vill du boka en fönsterplats, gångplats eller avsluta? (1: fönster 2: gång 3: avsluta)");
+            String pnr = tb.nextLine();
+
+            System.out.println("Vill du boka en (1) fönsterplats eller en (2) gångplats?");
             int val = tb.nextInt();
             tb.nextLine(); // För att konsumera ny rad, undiva skippad inmatning från användaren
-    
+
             switch (val) {
                 case 1: // Fönsterplats
                     if (antalLedigaPlatser == 0) {
@@ -48,7 +68,9 @@ public class App {
                             int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
                             int radnummer = platsnummer / platser[0].length;
                             int kolumnnummer = platsnummer % platser[0].length;
-                            System.out.println("Din bokning lyckades för (" + personnummer + ", " + namn + ")");
+                            bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                            personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                            System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
                             System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                             skrivUtPlatser(platser);
                         } else {
@@ -56,7 +78,7 @@ public class App {
                         }
                     }
                     break;
-    
+
                 case 2: // Gångplats
                     if (antalLedigaPlatser == 0) {
                         System.out.println("Tyvärr, det finns inga tillgängliga platser");
@@ -68,7 +90,9 @@ public class App {
                             int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
                             int radnummer = platsnummer / platser[0].length;
                             int kolumnnummer = platsnummer % platser[0].length;
-                            System.out.println("Din bokning lyckades för (" + personnummer + ", " + namn + ")");
+                            bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                            personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                            System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
                             System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                             skrivUtPlatser(platser);
                         } else {
@@ -76,27 +100,22 @@ public class App {
                         }
                     }
                     break;
-    
-                case 3: // Avsluta
-                    System.out.println("Hejdå…");
-                    skrivUtPlatser(platser);
-                    return;
-    
+
                 default:
-                    System.out.println("Ogiltigt val. Välj 1, 2 eller 3");
+                    System.out.println("Ogiltigt val. Välj 1 eller 2");
                     break;
             }
-    
-            System.out.println("Vill du boka en till plats eller avsluta? (boka/avsluta)");
+
+            System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
             String svar = tb.nextLine();
-            if (svar.equals("avsluta")) {
-                System.out.println("Tack för du bokade hos oss!");
+            if (svar.equals("meny")) {
                 skrivUtPlatser(platser);
+                meny();
                 return;
             }
         }
     }
-    
+
     // Metod som hittar lediga platser
     static int[] hittaLedigPlats(char[][] platser, char typ) {
         for (int i = 0; i < platser.length; i++) {
@@ -108,7 +127,7 @@ public class App {
         }
         return null;
     }
-    
+
     // Skriver ut en bild på arrayen med antalet platser
     static void skrivUtPlatser(char[][] platser) {
         System.out.println("Platser:");
@@ -120,9 +139,8 @@ public class App {
         }
     }
 
-
-    static void meny(){
-         Scanner tb = new Scanner(System.in);
+    static void meny() {
+        Scanner tb = new Scanner(System.in);
         boolean running = true;
 
         while (running) {
@@ -138,7 +156,7 @@ public class App {
                     case 2: //hitta plats
 
                     case 3: //Avboka plats
-                        System.out.println("Ditt personnummer krävs för att avboka \n Skriv in ditt personnummer här: ");
+                        avbokning();
                         running = false;
                         break;
                     case 4: //Beräkna vinst
@@ -153,13 +171,12 @@ public class App {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Felaktig inmatning. Ange en siffra.");
-            
+
+            }
         }
     }
-}
-    
-    public static void main(String[] args) throws Exception {
-            meny();
-            }
-    }
 
+    public static void main(String[] args) throws Exception {
+        meny();
+    }
+}
