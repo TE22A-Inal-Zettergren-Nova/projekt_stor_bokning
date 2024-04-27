@@ -20,6 +20,44 @@ public class App {
         return LocalDate.of(year, month, day);
     }
 
+    // Skriv ut bokade platser med förnamn, efternamn, födelsedatum och platsnummer, sorterat från yngst till äldst
+    static void skrivUtBokadePlatser() {
+        // Skapa en kopia av bokadeNamn, personnummer och födelsedatum
+        String[] kopieradeNamn = bokadeNamn.clone();
+        String[] kopieradePnr = personnummer.clone();
+        LocalDate[] kopieradefödelsedatum = födelsedatum.clone();
+
+        // Sortera bokade platser efter födelsedatum
+        for (int i = 0; i < kopieradefödelsedatum.length - 1; i++) {
+            for (int j = 0; j < kopieradefödelsedatum.length - i - 1; j++) {
+                if (kopieradefödelsedatum[j] != null && kopieradefödelsedatum[j + 1] != null &&
+                    kopieradefödelsedatum[j].isAfter(kopieradefödelsedatum[j + 1])) {
+                    LocalDate tempDatum = kopieradefödelsedatum[j];
+                    kopieradefödelsedatum[j] = kopieradefödelsedatum[j + 1];
+                    kopieradefödelsedatum[j + 1] = tempDatum;
+
+                    String tempNamn = kopieradeNamn[j];
+                    kopieradeNamn[j] = kopieradeNamn[j + 1];
+                    kopieradeNamn[j + 1] = tempNamn;
+
+                    String tempPnr = kopieradePnr[j];
+                    kopieradePnr[j] = kopieradePnr[j + 1];
+                    kopieradePnr[j + 1] = tempPnr;
+                }
+            }
+        }
+
+        // Skriv ut bokade platser sorterade efter ålder
+        System.out.println("Bokade platser (sorterat efter ålder):");
+        for (int i = 0; i < kopieradeNamn.length; i++) {
+            if (kopieradeNamn[i] != null) {
+                int platsnummer = i + 1;
+                System.out.println("Platsnummer: " + platsnummer + ", Namn: " + kopieradeNamn[i] +
+                        ", Födelsedatum: " + kopieradefödelsedatum[i].format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            }
+        }
+    }
+
 
     // För att hitta bokad plats
     static int hittaBokadPlats(String info) {
@@ -209,6 +247,7 @@ public class App {
                         running = false;
                         break;
                     case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
+                        skrivUtBokadePlatser();
                         running = false;
                         break;
                     case 5: // Beräknar vinst
