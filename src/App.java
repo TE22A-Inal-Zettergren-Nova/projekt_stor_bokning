@@ -1,5 +1,9 @@
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 
 public class App {
@@ -11,7 +15,29 @@ public class App {
     static LocalDate[] födelsedatum;
     final static Scanner tb = new Scanner(System.in);
 
-      // Konvertera personnummer till födelsedatum
+
+    // Metod för att beräkna vinsten
+    static double beräknaVinstRekursivt(int index) {
+        if (index >= bokadeNamn.length) {
+            return 0; // När ingen bokad plats kvar att behandla
+        }
+
+        if (bokadeNamn[index] != null) {
+            int ålder = Period.between(födelsedatum[index], LocalDate.now()).getYears();
+            double pris = (ålder < 18) ? 149.9 : 299.9;
+            return pris + beräknaVinstRekursivt(index + 1); // Adderar priset för bokad plats och går vidare
+        } else {
+            return beräknaVinstRekursivt(index + 1); // Hoppa över null-platser och gå vidare
+        }
+    }
+
+    // Metod för att ändra priset till två decimaler
+    static String formateraPris(double pris) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(pris);
+    }
+
+    // Konvertera personnummer till födelsedatum
     static LocalDate konverteraTillfödelsedatum(String personnummer) {
         // Personnumret är av formatet YYYYMMDD, de första fyra siffrorna är år, nästa två är månad, och sista två är dag.
         int year = Integer.parseInt(personnummer.substring(0, 4));
@@ -221,7 +247,7 @@ public class App {
         boolean running = true;
 
         while (running) {
-            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n Avsluta");
+            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta");
             try {
                 int startval = Integer.parseInt(tb.nextLine());
 
@@ -250,11 +276,15 @@ public class App {
                         skrivUtBokadePlatser();
                         running = false;
                         break;
-                    case 5: // Beräknar vinst
-                        System.out.println("Programmet avslutas...");
+                    case 5: // Beräknar vinst 
+                        double vinstRekursivt = beräknaVinstRekursivt(0);
+                        System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinstRekursivt) + " kr");
                         running = false;
                         break;
                     case 6: // Avsluat
+                        System.out.println("Programmet avslutas...");
+                        running = false;
+                        break;
 
                 }
             } catch (NumberFormatException e) {
