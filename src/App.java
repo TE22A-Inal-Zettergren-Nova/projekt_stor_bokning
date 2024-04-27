@@ -1,14 +1,27 @@
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class App {
 
     static char[][] platser;
     static String[] bokadeNamn;
+    static String[] bokadeEfternamn;
     static String[] personnummer;
-    static Scanner tb = new Scanner(System.in);
+    static LocalDate[] födelsedatum;
+    final static Scanner tb = new Scanner(System.in);
+
+      // Konvertera personnummer till födelsedatum
+    static LocalDate konverteraTillfödelsedatum(String personnummer) {
+        // Personnumret är av formatet YYYYMMDD, de första fyra siffrorna är år, nästa två är månad, och sista två är dag.
+        int year = Integer.parseInt(personnummer.substring(0, 4));
+        int month = Integer.parseInt(personnummer.substring(4, 6));
+        int day = Integer.parseInt(personnummer.substring(6, 8));
+        return LocalDate.of(year, month, day);
+    }
 
 
-    // För att hittaplats
+    // För att hitta bokad plats
     static int hittaBokadPlats(String info) {
         for (int i = 0; i < bokadeNamn.length; i++) {
             if (info.equals(bokadeNamn[i]) || info.equals(personnummer[i])) {
@@ -17,7 +30,6 @@ public class App {
         }
         return -1; // Returnera -1 om ingen bokad plats hittas
     }
-    
 
     // För att avboka
     static void avbokning() {
@@ -31,11 +43,14 @@ public class App {
                 platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig
                 bokadeNamn[i] = null; // Ta bort namnet från listan över bokade
                 personnummer[i] = null; // Ta bort personnumret från listan över bokade
+                födelsedatum[i] = null; // Ta bort födelsedatumet från listan över bokade
                 System.out.println("Platsen" + platser[radnummer][kolumnnummer] + "har avbokats för " + avbokningsinfo);
                 meny();
 
             }else{
-                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");}
+                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+                meny();
+            }
             }
         }
 
@@ -44,7 +59,10 @@ public class App {
         int antalLedigaPlatser = 20;
         platser = new char[5][4]; // Array med 5 rader och 4 kolumner
         bokadeNamn = new String[platser.length * platser[0].length]; // Array för namn på bokade
+        bokadeEfternamn = new String[platser.length * platser[0].length];
         personnummer = new String[platser.length * platser[0].length]; // Array för personnummer på bokade
+        födelsedatum = new LocalDate[platser.length * platser[0].length];
+
 
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
@@ -61,8 +79,14 @@ public class App {
             System.out.println("Ange ditt namn:");
             String namn = tb.nextLine();
 
-            System.out.println("Ange ditt personnummer:");
+            System.out.println("Ange ditt efternamn:");
+            String efternamn = tb.nextLine();
+
+            System.out.println("Ange ditt personnummer (YYYYMMDD):");
             String pnr = tb.nextLine();
+
+            // Konvertera personnumret till födelsedatum
+            LocalDate födelsedatum = konverteraTillfödelsedatum(pnr);
 
             System.out.println("Vill du boka en (1) fönsterplats eller en (2) gångplats?");
             int val = tb.nextInt();
@@ -77,11 +101,13 @@ public class App {
                         if (plats != null) {
                             platser[plats[0]][plats[1]] = 'X'; // 'X' representerar en upptagen plats
                             antalLedigaPlatser--;
-                            int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
+                            int platsnummer = (plats[0] * platser[0].length + plats[1] + 1); 
                             int radnummer = platsnummer / platser[0].length;
                             int kolumnnummer = platsnummer % platser[0].length;
                             bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                            bokadeEfternamn[platsnummer -1] = efternamn; // Lägg til efternamn på platsen
                             personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                            App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
                             System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
                             System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                             skrivUtPlatser(platser);
@@ -103,7 +129,9 @@ public class App {
                             int radnummer = platsnummer / platser[0].length;
                             int kolumnnummer = platsnummer % platser[0].length;
                             bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                            bokadeEfternamn[platsnummer -1] = efternamn; // Lägg til efternamn på platsen (För att sortera)
                             personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                            App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
                             System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
                             System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                             skrivUtPlatser(platser);
@@ -155,7 +183,7 @@ public class App {
         boolean running = true;
 
         while (running) {
-            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Beräkna vinst \n 5. Avsluta");
+            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n Avsluta");
             try {
                 int startval = Integer.parseInt(tb.nextLine());
 
@@ -180,14 +208,14 @@ public class App {
                         }
                         running = false;
                         break;
-                    case 4: //Beräkna vinst
-                        System.out.println("Den totala vinsten är...");
+                    case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
                         running = false;
                         break;
-                    case 5: //Avsluta
+                    case 5: // Beräknar vinst
                         System.out.println("Programmet avslutas...");
                         running = false;
                         break;
+                    case 6: // Avsluat
 
                 }
             } catch (NumberFormatException e) {
