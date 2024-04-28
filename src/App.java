@@ -6,7 +6,6 @@ import java.time.Month;
 import java.time.Period;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 public class App {
 
@@ -21,7 +20,7 @@ public class App {
     // Metod för att beräkna vinsten
     static double beräknaVinstRekursivt(int index) {
         if (index >= bokadeNamn.length) {
-            return 0; // När ingen bokad plats kvar att behandla
+            return 0; // När ingen bokad plats finns kvar att behandla
         }
 
         if (bokadeNamn[index] != null) {
@@ -32,7 +31,7 @@ public class App {
             return beräknaVinstRekursivt(index + 1); // Hoppa över null-platser och gå vidare
         }
     }
-
+    
     // Metod för att ändra priset till två decimaler
     static String formateraPris(double pris) {
         DecimalFormat df = new DecimalFormat("#.##");
@@ -72,14 +71,14 @@ public class App {
 
     // Konvertera personnummer till födelsedatum
     static LocalDate konverteraTillfödelsedatum(String personnummer) {
-        // Personnumret är av formatet YYYYMMDD, de första fyra siffrorna är år, nästa två är månad, och sista två är dag.
+        // Personnumret är av formatet YYYYMMDD, de första fyra siffrorna är år, nästa två är månad, och sista två är dag.INGA sista siffror
         int year = Integer.parseInt(personnummer.substring(0, 4));
         int month = Integer.parseInt(personnummer.substring(4, 6));
         int day = Integer.parseInt(personnummer.substring(6, 8));
         return LocalDate.of(year, month, day);
     }
 
-    // Skriv ut bokade platser med förnamn, efternamn, födelsedatum och platsnummer, sorterat från yngst till äldst
+    // Skriv ut bokade platser med förnamn, efternamn, födelsedatum och platsnummer, soreterat från äldst til yngst
     static void skrivUtBokadePlatser() {
         // Skapa en kopia av bokadeNamn, personnummer och födelsedatum
         String[] kopieradeNamn = bokadeNamn.clone();
@@ -151,113 +150,125 @@ public class App {
             }
         }
 
-    // För att boka plats
-    static void bokningssystem() {
-        int antalLedigaPlatser = 20;
-        platser = new char[5][4]; // Array med 5 rader och 4 kolumner
-        bokadeNamn = new String[platser.length * platser[0].length]; // Array för namn på bokade
-        bokadeEfternamn = new String[platser.length * platser[0].length];
-        personnummer = new String[platser.length * platser[0].length]; // Array för personnummer på bokade
-        födelsedatum = new LocalDate[platser.length * platser[0].length];
+   // För att boka plats
+   static void bokningssystem() {
+    int antalLedigaPlatser = 20;
+    platser = new char[5][4]; // Array med 5 rader och 4 kolumner
+    bokadeNamn = new String[platser.length * platser[0].length]; // Array för namn på bokade
+    bokadeEfternamn = new String[platser.length * platser[0].length];
+    personnummer = new String[platser.length * platser[0].length]; // Array för personnummer på bokade
+    födelsedatum = new LocalDate[platser.length * platser[0].length]; // Array för födelsedatum på bokade
 
-
-        for (int i = 0; i < platser.length; i++) {
-            for (int j = 0; j < platser[i].length; j++) {
-                if (j == 0 || j == 3) {
-                    platser[i][j] = 'F'; // 'F' representerar en fönsterplats
-                } else {
-                    platser[i][j] = 'G'; // 'G' representerar en gångplats
-                }
-            }
-        }
-
-
-        while (true) {
-            System.out.println("Ange ditt namn:");
-            String namn = tb.nextLine();
-
-            System.out.println("Ange ditt efternamn:");
-            String efternamn = tb.nextLine();
-
-            String pnr = ""; // Tilldela ett standardvärde
-            do {
-                System.out.println("Ange ditt personnummer (YYYYMMDD):");
-                pnr = tb.nextLine();
-                if (!ärKorrektPersonnummer(pnr)) {
-                    System.out.println("Ogiltigt personnummer. Försök igen.");
-                }
-            } while (!ärKorrektPersonnummer(pnr));
-        
-            // Konvertera personnumret till födelsedatum
-            LocalDate födelsedatum = konverteraTillfödelsedatum(pnr);
-
-            System.out.println("Vill du boka en (1) fönsterplats eller en (2) gångplats?");
-            int val = tb.nextInt();
-            tb.nextLine(); // För att konsumera ny rad, undiva skippad inmatning från användaren
-
-            switch (val) {
-                case 1: // Fönsterplats
-                    if (antalLedigaPlatser == 0) {
-                        System.out.println("Tyvärr, det finns inga tillgängliga platser");
-                    } else {
-                        int[] plats = hittaLedigPlats(platser, 'F');
-                        if (plats != null) {
-                            platser[plats[0]][plats[1]] = 'X'; // 'X' representerar en upptagen plats
-                            antalLedigaPlatser--;
-                            int platsnummer = (plats[0] * platser[0].length + plats[1] + 1); 
-                            int radnummer = platsnummer / platser[0].length;
-                            int kolumnnummer = platsnummer % platser[0].length;
-                            bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
-                            bokadeEfternamn[platsnummer -1] = efternamn; // Lägg til efternamn på platsen
-                            personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
-                            App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
-                            System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
-                            System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
-                            skrivUtPlatser(platser);
-                        } else {
-                            System.out.println("Tyvärr, inga tillgängliga fönsterplatser finns");
-                        }
-                    }
-                    break;
-
-                case 2: // Gångplats
-                    if (antalLedigaPlatser == 0) {
-                        System.out.println("Tyvärr, det finns inga tillgängliga platser");
-                    } else {
-                        int[] plats = hittaLedigPlats(platser, 'G');
-                        if (plats != null) {
-                            platser[plats[0]][plats[1]] = 'X'; // 'X' representerar en upptagen plats
-                            antalLedigaPlatser--;
-                            int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
-                            int radnummer = platsnummer / platser[0].length;
-                            int kolumnnummer = platsnummer % platser[0].length;
-                            bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
-                            bokadeEfternamn[platsnummer -1] = efternamn; // Lägg til efternamn på platsen (För att sortera)
-                            personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
-                            App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
-                            System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
-                            System.out.println("Din platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
-                            skrivUtPlatser(platser);
-                        } else {
-                            System.out.println("Tyvärr, inga tillgängliga gångplatser finns");
-                        }
-                    }
-                    break;
-
-                default:
-                    System.out.println("Ogiltigt val. Välj 1 eller 2");
-                    break;
-            }
-
-            System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
-            String svar = tb.nextLine();
-            if (svar.equals("meny")) {
-                skrivUtPlatser(platser);
-                meny();
-                return;
+    for (int i = 0; i < platser.length; i++) {
+        for (int j = 0; j < platser[i].length; j++) {
+            if (j == 0 || j == 3) {
+                platser[i][j] = 'F'; // 'F' representerar en fönsterplats
+            } else {
+                platser[i][j] = 'G'; // 'G' representerar en gångplats
             }
         }
     }
+
+    while (true) {
+        System.out.println("Ange ditt namn:");
+        String namn = tb.nextLine();
+
+        System.out.println("Ange ditt efternamn:");
+        String efternamn = tb.nextLine();
+
+        String pnr = ""; // Tilldela ett standardvärde
+        do {
+            System.out.println("Ange ditt personnummer (YYYYMMDD):");
+            pnr = tb.nextLine();
+            if (!ärKorrektPersonnummer(pnr)) {
+                System.out.println("Ogiltigt personnummer. Försök igen.");
+            }
+        } while (!ärKorrektPersonnummer(pnr));
+
+        // Konvertera personnumret till födelsedatum
+        LocalDate födelsedatum = konverteraTillfödelsedatum(pnr);
+
+        int val;
+            boolean ogiltigtVal = false;
+            do {
+                if (ogiltigtVal) {
+                    System.out.println("Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats.");
+                }
+                System.out.println("Vill du boka en (1) fönsterplats eller en (2) gångplats?");
+                while (!tb.hasNextInt()) {
+                    System.out.println("Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats.");
+                    tb.next();
+                }
+                val = tb.nextInt();
+                ogiltigtVal = true;
+            } while (val != 1 && val != 2);
+
+        tb.nextLine(); // För att konsumera ny rad, undiva skippad inmatning från användaren
+
+        switch (val) {
+            case 1: // Fönsterplats
+                if (antalLedigaPlatser == 0) {
+                    System.out.println("Tyvärr, det finns inga tillgängliga platser");
+                } else {
+                    int[] plats = hittaLedigPlats(platser, 'F');
+                    if (plats != null) {
+                        platser[plats[0]][plats[1]] = 'X'; // 'X' representerar en upptagen plats
+                        antalLedigaPlatser--;
+                        int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
+                        int radnummer = platsnummer / platser[0].length;
+                        int kolumnnummer = platsnummer % platser[0].length;
+                        bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                        bokadeEfternamn[platsnummer - 1] = efternamn; // Lägg til efternamn på platsen
+                        personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                        App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
+                        System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
+                        System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
+                        skrivUtPlatser(platser);
+                    } else {
+                        System.out.println("Tyvärr, inga tillgängliga fönsterplatser finns");
+                    }
+                }
+                break;
+
+            case 2: // Gångplats
+                if (antalLedigaPlatser == 0) {
+                    System.out.println("Tyvärr, det finns inga tillgängliga platser");
+                } else {
+                    int[] plats = hittaLedigPlats(platser, 'G');
+                    if (plats != null) {
+                        platser[plats[0]][plats[1]] = 'X'; // 'X' representerar en upptagen plats
+                        antalLedigaPlatser--;
+                        int platsnummer = (plats[0] * platser[0].length + plats[1] + 1);
+                        int radnummer = platsnummer / platser[0].length;
+                        int kolumnnummer = platsnummer % platser[0].length;
+                        bokadeNamn[platsnummer - 1] = namn; // Lägg till bokad namn på platsen
+                        bokadeEfternamn[platsnummer - 1] = efternamn; // Lägg til efternamn på platsen
+                        personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
+                        App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
+                        System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
+                        System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
+                        skrivUtPlatser(platser);
+                    } else {
+                        System.out.println("Tyvärr, inga tillgängliga gångplatser finns");
+                    }
+                }
+                break;
+
+            default:
+                System.out.println("Ogiltigt val. Välj 1 eller 2");
+        }
+
+        System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
+        String svar = tb.nextLine();
+        if (svar.equals("meny")) {
+            skrivUtPlatser(platser);
+            meny();
+        } else if (svar.equals("boka")) {
+            continue;
+        }
+    }
+}
+    
 
     // Metod som hittar lediga platser
     static int[] hittaLedigPlats(char[][] platser, char typ) {
@@ -325,6 +336,9 @@ public class App {
                     case 6: // Avsluat
                         System.out.println("Programmet avslutas...");
                         running = false;
+                        break;
+                    default:
+                        System.out.println("Felaktig inmatning. Du kan endast välja mellan 1-6.");
                         break;
 
                 }
