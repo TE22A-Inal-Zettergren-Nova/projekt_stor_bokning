@@ -50,6 +50,10 @@ public class App {
             int month = Integer.parseInt(personnummer.substring(4, 6));
             int day = Integer.parseInt(personnummer.substring(6, 8));
 
+            if (year < 1900 || year > Year.now().getValue()) {
+                return false; // Ogiltigt år
+            }
+
             if (month < 1 || month > 12) {
                 return false; // Ogiltig månad
             }
@@ -58,7 +62,6 @@ public class App {
                 return false; // Ogiltig dag
             }
 
-            LocalDate födelsedatum = konverteraTillfödelsedatum(personnummer);
             return true; // Konverteringen lyckades, personnumret är korrekt
         } catch (NumberFormatException e) {
             return false; // Felaktigt format
