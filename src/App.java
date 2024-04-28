@@ -1,10 +1,12 @@
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 import java.text.DecimalFormat;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.Period;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class App {
 
@@ -35,6 +37,34 @@ public class App {
     static String formateraPris(double pris) {
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format(pris);
+    }
+
+    // Metod för att kontrollera om personnumret är korrekt
+    static boolean ärKorrektPersonnummer(String personnummer) {
+        if (personnummer.length() != 8) {
+            return false; // Personnumret måste vara åtta siffror långt
+        }
+
+        try {
+            int year = Integer.parseInt(personnummer.substring(0, 4));
+            int month = Integer.parseInt(personnummer.substring(4, 6));
+            int day = Integer.parseInt(personnummer.substring(6, 8));
+
+            if (month < 1 || month > 12) {
+                return false; // Ogiltig månad
+            }
+
+            if (day < 1 || day > Month.of(month).length(Year.isLeap(year))) {
+                return false; // Ogiltig dag
+            }
+
+            LocalDate födelsedatum = konverteraTillfödelsedatum(personnummer);
+            return true; // Konverteringen lyckades, personnumret är korrekt
+        } catch (NumberFormatException e) {
+            return false; // Felaktigt format
+        } catch (DateTimeException e) {
+            return false; // Ogiltigt datum
+        }
     }
 
     // Konvertera personnummer till födelsedatum
@@ -146,9 +176,15 @@ public class App {
             System.out.println("Ange ditt efternamn:");
             String efternamn = tb.nextLine();
 
-            System.out.println("Ange ditt personnummer (YYYYMMDD):");
-            String pnr = tb.nextLine();
-
+            String pnr = ""; // Tilldela ett standardvärde
+            do {
+                System.out.println("Ange ditt personnummer (YYYYMMDD):");
+                pnr = tb.nextLine();
+                if (!ärKorrektPersonnummer(pnr)) {
+                    System.out.println("Ogiltigt personnummer. Försök igen.");
+                }
+            } while (!ärKorrektPersonnummer(pnr));
+        
             // Konvertera personnumret till födelsedatum
             LocalDate födelsedatum = konverteraTillfödelsedatum(pnr);
 
@@ -274,11 +310,13 @@ public class App {
                         break;
                     case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
                         skrivUtBokadePlatser();
+                        skrivUtPlatser(platser);
                         running = false;
                         break;
                     case 5: // Beräknar vinst 
                         double vinstRekursivt = beräknaVinstRekursivt(0);
                         System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinstRekursivt) + " kr");
+                        meny();
                         running = false;
                         break;
                     case 6: // Avsluat
