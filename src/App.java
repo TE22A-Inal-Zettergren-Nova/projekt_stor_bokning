@@ -298,23 +298,27 @@ public class App {
 
             default:
                 System.out.println("Ogiltigt val. Välj 1 eller 2");
-        }
+            }
+
+      // Fråga användaren om de vill boka en till plats eller gå tillbaka till menyn
+      while (true) {
         System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
         String svar = tb.nextLine();
         if (svar.equals("meny")) {
             skrivUtPlatser(platser);
             meny();
-        }
-        else if (svar.equals("boka")) {
-            continue;
-        }
-        else{
+            break; // Avsluta loopen när användaren väljer att gå till menyn
+        } else if (svar.equals("boka")) {
+            break; // Bryt loopen för att fortsätta med nästa bokning
+        } else {
             System.out.println("Felaktig inmatning. Välj mellan boka eller meny");
+        }
     }
+}
 }
 
   
-}
+
     
 
     // Metod som hittar lediga platser
