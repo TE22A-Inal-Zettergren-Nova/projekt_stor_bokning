@@ -1,3 +1,9 @@
+// Lägga till färg vid error
+// Fixa så att den inte kan krasha alls
+// Fixa så den skriver ut siffror istället för F och G
+// Kolla igenom metoder, dela upp om behövs
+// FIXA avboknings metoden så den ger ut korrekt siffra efter avbokning
+
 import java.util.Scanner;
 import java.text.DecimalFormat;
 import java.time.DateTimeException;
@@ -31,7 +37,7 @@ public class App {
             return beräknaVinstRekursivt(index + 1); // Hoppa över null-platser och gå vidare
         }
     }
-    
+
     // Metod för att ändra priset till två decimaler
     static String formateraPris(double pris) {
         DecimalFormat df = new DecimalFormat("#.##");
@@ -80,8 +86,9 @@ public class App {
 
     // Skriv ut bokade platser med förnamn, efternamn, födelsedatum och platsnummer, soreterat från äldst til yngst
     static void skrivUtBokadePlatser() {
-        // Skapa en kopia av bokadeNamn, personnummer och födelsedatum
+        // Skapa en kopia av bokadeNamn, bokadEfternamn, personnummer och födelsedatum för att inte förstöra tidigare boknings lista
         String[] kopieradeNamn = bokadeNamn.clone();
+        String[] kopieradeEfternamn = bokadeEfternamn.clone();
         String[] kopieradePnr = personnummer.clone();
         LocalDate[] kopieradefödelsedatum = födelsedatum.clone();
 
@@ -98,6 +105,10 @@ public class App {
                     kopieradeNamn[j] = kopieradeNamn[j + 1];
                     kopieradeNamn[j + 1] = tempNamn;
 
+                    String tempEfternamn = kopieradeEfternamn[j];
+                    kopieradeEfternamn[j] = kopieradeEfternamn[j + 1];
+                    kopieradeEfternamn[j + 1] = tempEfternamn;
+
                     String tempPnr = kopieradePnr[j];
                     kopieradePnr[j] = kopieradePnr[j + 1];
                     kopieradePnr[j + 1] = tempPnr;
@@ -105,13 +116,13 @@ public class App {
             }
         }
 
-        // Skriv ut bokade platser sorterade efter ålder
-        System.out.println("Bokade platser (sorterat efter ålder):");
+        // Skriv ut bokade platser sorterade efter ålder, äldst först
+        System.out.println("Bokade platser (sorterat efter ålder, äldst först):");
         for (int i = 0; i < kopieradeNamn.length; i++) {
             if (kopieradeNamn[i] != null) {
                 int platsnummer = i + 1;
-                System.out.println("Platsnummer: " + platsnummer + ", Namn: " + kopieradeNamn[i] +
-                        ", Födelsedatum: " + kopieradefödelsedatum[i].format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                System.out.println("Platsnummer: " + platsnummer + ", Namn: " + kopieradeNamn[i] + ", Efternamn: " + kopieradeEfternamn[i] +
+                        ", Födelsedatum: " + kopieradefödelsedatum[i].format(DateTimeFormatter.ofPattern("YYYY-MM-DD")));
             }
         }
     }
@@ -127,6 +138,22 @@ public class App {
         return -1; // Returnera -1 om ingen bokad plats hittas
     }
 
+    static void omAvbokningFel(){
+        System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+                System.out.println("Vill du gå tillbka till menyn eller försöka avboka igen? (meny/avboka)");
+                String svar = tb.nextLine();
+                if (svar.equals("meny")) {
+                    meny();
+                }
+                else if (svar.equals("avboka")) {
+                    avbokning();
+                }
+                else{
+                    System.out.println("Felaktig inmatning. Välj mellan meny eller avboka");
+                    omAvbokningFel();
+                }
+    }
+
     // För att avboka
     static void avbokning() {
         System.out.println("Ange ditt namn eller personnummer för avbokning:");
@@ -136,19 +163,22 @@ public class App {
             if (avbokningsinfo.equals(bokadeNamn[i]) || avbokningsinfo.equals(personnummer[i])) {
                 int radnummer = i / platser[0].length;
                 int kolumnnummer = i % platser[0].length;
-                platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig
+                platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig 
                 bokadeNamn[i] = null; // Ta bort namnet från listan över bokade
+                bokadeEfternamn[i] = null; // ta bort efternamnet från listan över bokade
                 personnummer[i] = null; // Ta bort personnumret från listan över bokade
                 födelsedatum[i] = null; // Ta bort födelsedatumet från listan över bokade
-                System.out.println("Platsen" + platser[radnummer][kolumnnummer] + "har avbokats för " + avbokningsinfo);
+                System.out.println("Platsen " + platser[radnummer][kolumnnummer] + " har avbokats för " + avbokningsinfo);
                 meny();
 
             }else{
-                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
-                meny();
-            }
+                omAvbokningFel();
             }
         }
+    }
+        
+
+
 
    // För att boka plats
    static void bokningssystem() {
@@ -257,16 +287,21 @@ public class App {
             default:
                 System.out.println("Ogiltigt val. Välj 1 eller 2");
         }
-
         System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
         String svar = tb.nextLine();
         if (svar.equals("meny")) {
             skrivUtPlatser(platser);
             meny();
-        } else if (svar.equals("boka")) {
+        }
+        else if (svar.equals("boka")) {
             continue;
         }
+        else{
+            System.out.println("Felaktig inmatning. Välj mellan boka eller meny");
     }
+}
+
+  
 }
     
 
@@ -287,12 +322,19 @@ public class App {
         System.out.println("Platser:");
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
-                System.out.print("[" + platser[i][j] + "] ");
+                int platsnummer = (i * platser[0].length) + j + 1; // Beräkna platsnumret
+                String formateratPlatsnummer = String.format("%02d", platsnummer); // Lägg till en 0 framför ental
+                if (platser[i][j] == 'X') {
+                    System.out.print("[X] ");
+                } else {
+                    System.out.print("[" + formateratPlatsnummer + "] ");
+                }
             }
             System.out.println();
         }
     }
 
+    // Meny med alternativ
     static void meny() {
         boolean running = true;
 
@@ -315,7 +357,9 @@ public class App {
                         String info = tb.nextLine();
                         int platsnummer = hittaBokadPlats(info);
                         if (platsnummer != -1) {
-                            System.out.println("Du har plats: " + platsnummer);} 
+                            System.out.println("Du har plats: " + platsnummer);
+                            meny();
+                        } 
                         else {
                             System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
                             meny();
@@ -325,6 +369,7 @@ public class App {
                     case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
                         skrivUtBokadePlatser();
                         skrivUtPlatser(platser);
+                        meny();
                         running = false;
                         break;
                     case 5: // Beräknar vinst 
@@ -338,7 +383,7 @@ public class App {
                         running = false;
                         break;
                     default:
-                        System.out.println("Felaktig inmatning. Du kan endast välja mellan 1-6.");
+                        System.out.println("Felaktig inmatning. Du kan endast välja mellan siffrorna 1-6.");
                         break;
 
                 }
