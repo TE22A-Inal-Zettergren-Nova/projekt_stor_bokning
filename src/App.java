@@ -1,8 +1,7 @@
 // Lägga till färg vid error
 // Fixa så att den inte kan krasha alls
-// Fixa så den skriver ut siffror istället för F och G
 // Kolla igenom metoder, dela upp om behövs
-// FIXA avboknings metoden så den ger ut korrekt siffra efter avbokning
+
 
 import java.util.Scanner;
 import java.text.DecimalFormat;
@@ -12,6 +11,7 @@ import java.time.Month;
 import java.time.Period;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
+
 
 public class App {
 
@@ -156,26 +156,38 @@ public class App {
 
     // För att avboka
     static void avbokning() {
-        System.out.println("Ange ditt namn eller personnummer för avbokning:");
+        System.out.println("Ange ditt namn eller personnummer för att avboka:");
         String avbokningsinfo = tb.nextLine();
-
+        boolean avbokningHittad = false;
+    
         for (int i = 0; i < bokadeNamn.length; i++) {
             if (avbokningsinfo.equals(bokadeNamn[i]) || avbokningsinfo.equals(personnummer[i])) {
+                int platsnummer = (i + 1); // Beräkna platsnumret
+                String formateratPlatsnummer = String.format("%02d", platsnummer); // Lägg till en 0 framför ental
+    
                 int radnummer = i / platser[0].length;
                 int kolumnnummer = i % platser[0].length;
-                platser[radnummer][kolumnnummer] = 'G'; // Återställ platsen till ledig 
+                platser[radnummer][kolumnnummer] = '0'; // Återställ platsen till ledig 
                 bokadeNamn[i] = null; // Ta bort namnet från listan över bokade
                 bokadeEfternamn[i] = null; // ta bort efternamnet från listan över bokade
                 personnummer[i] = null; // Ta bort personnumret från listan över bokade
                 födelsedatum[i] = null; // Ta bort födelsedatumet från listan över bokade
-                System.out.println("Platsen " + platser[radnummer][kolumnnummer] + " har avbokats för " + avbokningsinfo);
-                meny();
-
-            }else{
-                omAvbokningFel();
+    
+                System.out.println("Platsen " + formateratPlatsnummer + " har avbokats för " + avbokningsinfo);
+                skrivUtPlatser(platser);
+                avbokningHittad = true;
+                break; // Avbryt loopen när avbokningen har skett
             }
         }
+    
+        if (!avbokningHittad) {
+            omAvbokningFel();
+
+        }else{
+        System.out.println(" ");
+        meny();
     }
+}
         
 
 
