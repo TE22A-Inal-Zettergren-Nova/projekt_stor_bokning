@@ -22,6 +22,30 @@ public class App {
     static LocalDate[] födelsedatum;
     final static Scanner tb = new Scanner(System.in);
 
+    // Metod för att kontrollera om det finns bokade platser
+    static boolean finnsBokadePlatser() {
+        if (bokadeNamn == null) {
+            return false;
+        }
+
+        for (String namn : bokadeNamn) {
+            if (namn != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Metod för att beräkna vinsten
+    static double beräknaVinst() {
+        if (!finnsBokadePlatser()) {
+            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
+            meny(); // Skicka tillbaka till menyn
+            return 0;
+        }
+        else
+        {return beräknaVinstRekursivt(0);} // Skickar till metod som beräknar vinsten ifall det finns bokade platser
+    }
 
     // Metod för att beräkna vinsten
     static double beräknaVinstRekursivt(int index) {
@@ -316,10 +340,7 @@ public class App {
     }
 }
 }
-
-  
-
-    
+ 
 
     // Metod som hittar lediga platser
     static int[] hittaLedigPlats(char[][] platser, char typ) {
@@ -355,6 +376,7 @@ public class App {
         boolean running = true;
 
         while (running) {
+            System.out.println(" ");
             System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta");
             try {
                 int startval = Integer.parseInt(tb.nextLine());
@@ -388,9 +410,10 @@ public class App {
                         meny();
                         running = false;
                         break;
-                    case 5: // Beräknar vinst 
-                        double vinstRekursivt = beräknaVinstRekursivt(0);
-                        System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinstRekursivt) + " kr");
+                        case 5: // Beräknar vinst 
+                        double vinst = beräknaVinst();
+                        if (vinst > 0) {
+                            System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinst) + " kr");}
                         meny();
                         running = false;
                         break;
