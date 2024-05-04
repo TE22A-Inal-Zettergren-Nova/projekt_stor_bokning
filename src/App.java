@@ -1,6 +1,5 @@
 // Lägga till färg vid error
 // Fixa så att den inte kan krasha alls
-// Kolla igenom metoder, dela upp om behövs
 
 
 import java.util.Scanner;
@@ -15,6 +14,13 @@ import java.time.format.DateTimeFormatter;
 
 public class App {
 
+    // Färger
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+
+
     static char[][] platser;
     static String[] bokadeNamn;
     static String[] bokadeEfternamn;
@@ -22,20 +28,25 @@ public class App {
     static LocalDate[] födelsedatum;
     final static Scanner tb = new Scanner(System.in);
 
+    // Metod som gör att de inte krashar om man skriver med stora/små bokstäver
+    static String ignoreraBokstäver(String input) {
+        return input.toLowerCase();
+    }
+
      // Metod för "hitta plats" utan krasch när inga platser är bokade
     static void hittaPlats() {
         if (!finnsBokadePlatser()) {
-            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
+            System.out.println(ANSI_RED + "Inga platser är bokade. Gå tillbaka till menyn och boka en plats först." + ANSI_RESET);
             meny(); // Skicka tillbaka till menyn
         } else {
             System.out.println("Ange ditt namn eller personnummer för att hitta din plats:");
-            String info = tb.nextLine();
+            String info = ignoreraBokstäver(tb.nextLine());
             int platsnummer = hittaBokadPlats(info);
             if (platsnummer != -1) {
                 System.out.println("Du har plats: " + platsnummer);
                 meny();
             } else {
-                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+                System.out.println(ANSI_RED + "Ingen bokning hittades för angivet namn eller personnummer." + ANSI_RESET);
                 meny();
             }
         }
@@ -58,7 +69,7 @@ public class App {
      // Metod för "beräknavinstrekursivt" inte krashar när det inte finns några platser bokade
      static double beräknaVinst() {
         if (!finnsBokadePlatser()) {
-            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
+            System.out.println(ANSI_RED + "Inga platser är bokade. Gå tillbaka till menyn och boka en plats först." + ANSI_RESET);
             meny(); // Skicka tillbaka till menyn
             return 0;
         }
@@ -182,9 +193,9 @@ public class App {
     }
 
     static void omAvbokningFel(){
-        System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+        System.out.println(ANSI_RED + "Ingen bokning hittades för angivet namn eller personnummer." + ANSI_RESET);
                 System.out.println("Vill du gå tillbka till menyn eller försöka avboka igen? (meny/avboka)");
-                String svar = tb.nextLine();
+                String svar = ignoreraBokstäver(tb.nextLine());
                 if (svar.equals("meny")) {
                     meny();
                 }
@@ -192,19 +203,27 @@ public class App {
                     avbokning();
                 }
                 else{
-                    System.out.println("Felaktig inmatning. Välj mellan meny eller avboka");
+                    System.out.println(ANSI_RED + "Felaktig inmatning. Välj mellan meny eller avboka" + ANSI_RESET);
                     omAvbokningFel();
                 }
     }
 
     // För att avboka
     static void avbokning() {
+
+        // Kollar om de finns några bokade platser i förväg 
+        if (!finnsBokadePlatser()) {
+            System.out.println(ANSI_RED + "Det finns inga bokade platser att avboka."+ ANSI_RESET);
+            meny(); // Return to the menu
+            return;
+        }
+    
         System.out.println("Ange ditt namn eller personnummer för att avboka:");
-        String avbokningsinfo = tb.nextLine();
+        String avbokningsinfo = ignoreraBokstäver(tb.nextLine());
         boolean avbokningHittad = false;
     
         for (int i = 0; i < bokadeNamn.length; i++) {
-            if (avbokningsinfo.equals(bokadeNamn[i]) || avbokningsinfo.equals(personnummer[i])) {
+            if (avbokningsinfo.equals(ignoreraBokstäver(bokadeNamn[i])) || avbokningsinfo.equals(personnummer[i])) {
                 int platsnummer = (i + 1); // Beräkna platsnumret
                 String formateratPlatsnummer = String.format("%02d", platsnummer); // Lägg till en 0 framför ental
     
@@ -216,7 +235,7 @@ public class App {
                 personnummer[i] = null; // Ta bort personnumret från listan över bokade
                 födelsedatum[i] = null; // Ta bort födelsedatumet från listan över bokade
     
-                System.out.println("Platsen " + formateratPlatsnummer + " har avbokats för " + avbokningsinfo);
+                System.out.println("Platsen " + formateratPlatsnummer + " har avbokats för " + ignoreraBokstäver(avbokningsinfo));
                 skrivUtPlatser(platser);
                 avbokningHittad = true;
                 break; // Avbryt loopen när avbokningen har skett
@@ -227,7 +246,6 @@ public class App {
             omAvbokningFel();
 
         }else{
-        System.out.println(" ");
         meny();
     }
 }
@@ -264,7 +282,7 @@ public class App {
             System.out.println("Ange ditt personnummer (YYYYMMDD):");
             pnr = tb.nextLine();
             if (!ärKorrektPersonnummer(pnr)) {
-                System.out.println("Ogiltigt personnummer. Försök igen.");
+                System.out.println(ANSI_RED + "Ogiltigt personnummer. Försök igen." + ANSI_RESET);
             }
         } while (!ärKorrektPersonnummer(pnr));
 
@@ -275,11 +293,11 @@ public class App {
             boolean ogiltigtVal = false;
             do {
                 if (ogiltigtVal) {
-                    System.out.println("Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats.");
+                    System.out.println(ANSI_RED + "Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats." + ANSI_RESET);
                 }
                 System.out.println("Vill du boka en (1) fönsterplats eller en (2) gångplats?");
                 while (!tb.hasNextInt()) {
-                    System.out.println("Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats.");
+                    System.out.println(ANSI_RED + "Ogiltigt val. Välj 1 för fönsterplats eller 2 för gångplats." + ANSI_RESET);
                     tb.next();
                 }
                 val = tb.nextInt();
@@ -291,7 +309,7 @@ public class App {
         switch (val) {
             case 1: // Fönsterplats
                 if (antalLedigaPlatser == 0) {
-                    System.out.println("Tyvärr, det finns inga tillgängliga platser");
+                    System.out.println(ANSI_RED + "Tyvärr, det finns inga tillgängliga platser" + ANSI_RESET);
                 } else {
                     int[] plats = hittaLedigPlats(platser, 'F');
                     if (plats != null) {
@@ -308,14 +326,14 @@ public class App {
                         System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                         skrivUtPlatser(platser);
                     } else {
-                        System.out.println("Tyvärr, inga tillgängliga fönsterplatser finns");
+                        System.out.println(ANSI_RED + "Tyvärr, inga tillgängliga fönsterplatser finns" + ANSI_RESET);
                     }
                 }
                 break;
 
             case 2: // Gångplats
                 if (antalLedigaPlatser == 0) {
-                    System.out.println("Tyvärr, det finns inga tillgängliga platser");
+                    System.out.println(ANSI_RED + "Tyvärr, det finns inga tillgängliga platser" + ANSI_RESET);
                 } else {
                     int[] plats = hittaLedigPlats(platser, 'G');
                     if (plats != null) {
@@ -332,19 +350,19 @@ public class App {
                         System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
                         skrivUtPlatser(platser);
                     } else {
-                        System.out.println("Tyvärr, inga tillgängliga gångplatser finns");
+                        System.out.println(ANSI_RED + "Tyvärr, inga tillgängliga gångplatser finns" + ANSI_RESET);
                     }
                 }
                 break;
 
             default:
-                System.out.println("Ogiltigt val. Välj 1 eller 2");
+                System.out.println(ANSI_RED + "Ogiltigt val. Välj 1 eller 2" + ANSI_RESET);
             }
 
       // Fråga användaren om de vill boka en till plats eller gå tillbaka till menyn
       while (true) {
         System.out.println("Vill du boka en till plats eller gå tillbaka till menyn? (boka/meny)");
-        String svar = tb.nextLine();
+        String svar = ignoreraBokstäver(tb.nextLine());
         if (svar.equals("meny")) {
             skrivUtPlatser(platser);
             meny();
@@ -352,7 +370,7 @@ public class App {
         } else if (svar.equals("boka")) {
             break; // Bryt loopen för att fortsätta med nästa bokning
         } else {
-            System.out.println("Felaktig inmatning. Välj mellan boka eller meny");
+            System.out.println(ANSI_RED + "Felaktig inmatning. Välj mellan boka eller meny" + ANSI_RESET);
         }
     }
 }
@@ -394,7 +412,7 @@ public class App {
 
         while (running) {
             System.out.println(" ");
-            System.out.println("Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta");
+            System.out.println(ANSI_BLUE + "Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta" + ANSI_RESET);
             try {
                 int startval = Integer.parseInt(tb.nextLine());
 
@@ -415,7 +433,7 @@ public class App {
                         if (finnsBokadePlatser()) {
                             skrivUtBokadePlatser();
                         } else {
-                            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
+                            System.out.println(ANSI_RED + "Inga platser är bokade. Gå tillbaka till menyn och boka en plats först." + ANSI_RESET);
                         }
                         
                         if (platser != null) {
@@ -429,7 +447,7 @@ public class App {
                     case 5: // Beräknar vinst 
                         double vinst = beräknaVinst();
                         if (vinst > 0) {
-                            System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinst) + " kr");}
+                            System.out.println(ANSI_GREEN + "Total vinst på alla bokade platser: " + formateraPris(vinst) + " kr" + ANSI_RESET);}
                         meny();
                         running = false;
                         break;
@@ -438,12 +456,12 @@ public class App {
                         running = false;
                         break;
                     default:
-                        System.out.println("Felaktig inmatning. Du kan endast välja mellan siffrorna 1-6.");
+                        System.out.println(ANSI_RED + "Felaktig inmatning. Du kan endast välja mellan siffrorna 1-6." + ANSI_RESET);
                         break;
 
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Felaktig inmatning. Ange en siffra.");
+                System.out.println(ANSI_RED + "Felaktig inmatning. Ange en siffra." + ANSI_RESET);
 
             }
         }
