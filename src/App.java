@@ -19,6 +19,7 @@ public class App {
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
 
 
     static char[][] platser;
@@ -322,8 +323,8 @@ public class App {
                         bokadeEfternamn[platsnummer - 1] = efternamn; // Lägg til efternamn på platsen
                         personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
                         App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
-                        System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
-                        System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
+                        System.out.println(ANSI_GREEN + "Din bokning lyckades för (" + pnr + ", " + namn + ")" + ANSI_RESET);
+                        System.out.println(ANSI_GREEN + "Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer) + ANSI_RESET);
                         skrivUtPlatser(platser);
                     } else {
                         System.out.println(ANSI_RED + "Tyvärr, inga tillgängliga fönsterplatser finns" + ANSI_RESET);
@@ -346,8 +347,8 @@ public class App {
                         bokadeEfternamn[platsnummer - 1] = efternamn; // Lägg til efternamn på platsen
                         personnummer[platsnummer - 1] = pnr; // Lägg till personnummer på platsen
                         App.födelsedatum[platsnummer - 1] = födelsedatum; // Lägg till födelsedatum på platsen
-                        System.out.println("Din bokning lyckades för (" + pnr + ", " + namn + ")");
-                        System.out.println("Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer));
+                        System.out.println(ANSI_GREEN + "Din bokning lyckades för (" + pnr + ", " + namn + ")" + ANSI_RESET);
+                        System.out.println(ANSI_GREEN + "Ditt platsnummer är: " + ((radnummer * platser[0].length) + kolumnnummer) + ANSI_RESET);
                         skrivUtPlatser(platser);
                     } else {
                         System.out.println(ANSI_RED + "Tyvärr, inga tillgängliga gångplatser finns" + ANSI_RESET);
@@ -376,7 +377,6 @@ public class App {
 }
 }
  
-
     // Metod som hittar lediga platser
     static int[] hittaLedigPlats(char[][] platser, char typ) {
         for (int i = 0; i < platser.length; i++) {
@@ -391,15 +391,15 @@ public class App {
 
     // Skriver ut en bild på arrayen med antalet platser
     static void skrivUtPlatser(char[][] platser) {
-        System.out.println("Platser:");
+        System.out.println("Alla platser:");
         for (int i = 0; i < platser.length; i++) {
             for (int j = 0; j < platser[i].length; j++) {
                 int platsnummer = (i * platser[0].length) + j + 1; // Beräkna platsnumret
                 String formateratPlatsnummer = String.format("%02d", platsnummer); // Lägg till en 0 framför ental
                 if (platser[i][j] == 'X') {
-                    System.out.print("[X] ");
+                    System.out.print(ANSI_RED + "[X] " + ANSI_RESET);
                 } else {
-                    System.out.print("[" + formateratPlatsnummer + "] ");
+                    System.out.print(ANSI_BLUE + "[" + formateratPlatsnummer + "] " + ANSI_RESET);
                 }
             }
             System.out.println();
@@ -412,9 +412,9 @@ public class App {
 
         while (running) {
             System.out.println(" ");
-            System.out.println(ANSI_BLUE + "Meny \n 1. Boka \n 2. Avboka \n 3. Hitta plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta" + ANSI_RESET);
+            System.out.println(ANSI_PURPLE + "Meny \n 1. Boka en plats \n 2. Avboka en plats \n 3. Hitta bokad plats \n 4. Bokade platser \n 5. Beräkna vinst \n 6. Avsluta programmet" + ANSI_RESET);
             try {
-                int startval = Integer.parseInt(tb.nextLine());
+                int startval = Integer.parseInt(tb.nextLine()); 
 
                 switch (startval) {
                     case 1: //Boka plats
