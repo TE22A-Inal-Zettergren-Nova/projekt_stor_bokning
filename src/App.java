@@ -22,6 +22,25 @@ public class App {
     static LocalDate[] födelsedatum;
     final static Scanner tb = new Scanner(System.in);
 
+     // Metod för "hitta plats" utan krasch när inga platser är bokade
+    static void hittaPlats() {
+        if (!finnsBokadePlatser()) {
+            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
+            meny(); // Skicka tillbaka till menyn
+        } else {
+            System.out.println("Ange ditt namn eller personnummer för att hitta din plats:");
+            String info = tb.nextLine();
+            int platsnummer = hittaBokadPlats(info);
+            if (platsnummer != -1) {
+                System.out.println("Du har plats: " + platsnummer);
+                meny();
+            } else {
+                System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
+                meny();
+            }
+        }
+    }
+
     // Metod för att kontrollera om det finns bokade platser
     static boolean finnsBokadePlatser() {
         if (bokadeNamn == null) {
@@ -36,8 +55,8 @@ public class App {
         return false;
     }
 
-    // Metod för att beräkna vinsten
-    static double beräknaVinst() {
+     // Metod för "beräknavinstrekursivt" inte krashar när det inte finns några platser bokade
+     static double beräknaVinst() {
         if (!finnsBokadePlatser()) {
             System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
             meny(); // Skicka tillbaka till menyn
@@ -214,8 +233,6 @@ public class App {
 }
         
 
-
-
    // För att boka plats
    static void bokningssystem() {
     int antalLedigaPlatser = 20;
@@ -391,26 +408,19 @@ public class App {
                         running = false;
                         break;
                     case 3: //Hitta plats
-                        System.out.println("Ange ditt namn eller personnummer för att hitta din plats:");
-                        String info = tb.nextLine();
-                        int platsnummer = hittaBokadPlats(info);
-                        if (platsnummer != -1) {
-                            System.out.println("Du har plats: " + platsnummer);
-                            meny();
-                        } 
-                        else {
-                            System.out.println("Ingen bokning hittades för angivet namn eller personnummer.");
-                            meny();
-                        }
+                        hittaPlats();
                         running = false;
                         break;
                     case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
-                        skrivUtBokadePlatser();
+                        if (finnsBokadePlatser()) {
+                            skrivUtBokadePlatser();
+                        }
                         skrivUtPlatser(platser);
                         meny();
                         running = false;
                         break;
-                        case 5: // Beräknar vinst 
+        
+                    case 5: // Beräknar vinst 
                         double vinst = beräknaVinst();
                         if (vinst > 0) {
                             System.out.println("Total vinst på alla bokade platser: " + formateraPris(vinst) + " kr");}
