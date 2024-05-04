@@ -414,8 +414,14 @@ public class App {
                     case 4: // Visar bokade platser och vem som bokat (äldst till yngst)
                         if (finnsBokadePlatser()) {
                             skrivUtBokadePlatser();
+                        } else {
+                            System.out.println("Inga platser är bokade. Gå tillbaka till menyn och boka en plats först.");
                         }
-                        skrivUtPlatser(platser);
+                        
+                        if (platser != null) {
+                            skrivUtPlatser(platser);
+                        }
+                        
                         meny();
                         running = false;
                         break;
